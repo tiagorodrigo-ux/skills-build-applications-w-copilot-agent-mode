@@ -16,17 +16,36 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+
 from rest_framework import routers
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from octofit_tracker import views
 
 router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'teams', views.TeamViewSet)
 router.register(r'activities', views.ActivityViewSet)
-router.register(r'leaderboards', views.LeaderboardViewSet)
 router.register(r'workouts', views.WorkoutViewSet)
+router.register(r'leaderboards', views.LeaderboardViewSet)
+
+# Custom API root view
+@api_view(['GET'])
+def api_root(request, format=None):
+    host = request.get_host()
+    scheme = 'https' if request.is_secure() or host.endswith('.github.dev') else 'http'
+    base_url = f"{scheme}://{host}/api/"
+    return Response({
+        'users': base_url + 'users/',
+        'teams': base_url + 'teams/',
+        'activities': base_url + 'activities/',
+        'workouts': base_url + 'workouts/',
+        'leaderboard': base_url + 'leaderboards/',
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('', api_root, name='api-root'),
 ]
