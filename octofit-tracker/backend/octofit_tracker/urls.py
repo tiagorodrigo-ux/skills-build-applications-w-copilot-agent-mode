@@ -34,14 +34,15 @@ router.register(r'leaderboards', views.LeaderboardViewSet)
 @api_view(['GET'])
 def api_root(request, format=None):
     host = request.get_host()
-    scheme = 'https' if request.is_secure() or host.endswith('.github.dev') else 'http'
+    # treat Codespaces / preview URL hosts as HTTPS
+    scheme = 'https' if request.is_secure() or host.endswith('-8000.app.github.dev') or host.endswith('.github.dev') else 'http'
     base_url = f"{scheme}://{host}/api/"
     return Response({
         'users': base_url + 'users/',
         'teams': base_url + 'teams/',
         'activities': base_url + 'activities/',
         'workouts': base_url + 'workouts/',
-        'leaderboard': base_url + 'leaderboards/',
+        'leaderboards': base_url + 'leaderboards/',
     })
 
 urlpatterns = [
